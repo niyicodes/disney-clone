@@ -1,32 +1,50 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useParams } from "react-router-dom";
-import { collection, onSnapshot } from "firebase/firestore";
+import { collection, onSnapshot, getDoc, doc } from "firebase/firestore";
 import { db } from "../Firebase/FirebaseConfigFile";
 
 const Detail = (props) => {
  const { id } = useParams();
- console.log(id)
+ //  console.log(id);
  const [detailData, setDetailData] = useState({});
 
- useEffect(() => {
-  onSnapshot(collection(db, "movies"), (snapshot) => {
-   snapshot
-    .doc(id)
-    .get()
-    .then((doc) => {
-     if (doc.exists) {
-      setDetailData(doc.data());
-      console.log(doc.data());
-     } else {
-      console.log("no such document in firebase 🔥");
-     }
-    })
-    .catch((error) => {
-     console.log("Error getting document:", error);
-    });
-  });
- }, [id]);
+ // const colRef = collection(db, "movies");
+ const colRef = doc(db, "movies", id);
+
+//  useEffect(() => {
+//   console.log(id);
+//   onSnapshot(colRef, (snapshot) => {
+//    snapshot
+//     .getDoc(id)
+//     .then((doc) => {
+//      if (doc.exists) {
+//       setDetailData(doc.data());
+//       console.log(doc.data());
+//      } else {
+//       console.log("no such document in firebase 🔥");
+//      }
+//     })
+//     .catch((error) => {
+//      console.log("Error getting document:", error);
+//     });
+//   });
+//  }, [id]);
+
+  useEffect(() => {
+  async function getDetail(){
+    const colRef = doc(db,"movies",id);
+  const docSnap = await getDoc(colRef);
+   if (docSnap) {
+    setDetailData(docSnap.data());
+     console.log("Document data:", docSnap.data());
+   } else {
+     // doc.data() will be undefined in this case
+     console.log("No such document!");
+   }
+  }
+  getDetail()
+  }, [colRef, id]);
 
  return (
   <Container>
